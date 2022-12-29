@@ -1,0 +1,323 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+
+	<comment>SQL</comment>
+	
+		
+	<!-- 챌린지 게시판 리스트 조회를 위한 쿼리문 -->
+	<entry key="selectChallengeList">
+		SELECT CHAL_NO
+		     , CHAL_TITLE
+		     , TO_CHAR(CHAL_START, 'YYYY-MM-DD') "CHAL_START"
+		     , TO_CHAR(CHAL_END, 'YYYY-MM-DD') "CHAL_END"
+		     , CHAL_HIT
+		     , CHAL_STATUS
+		FROM CHALLENGE
+		ORDER BY CHAL_NO DESC
+	</entry>
+	
+	<!-- 챌린지 댓글 게시판에서 챌린지 내용 조회를 위한 쿼리문 -->
+	<entry key="selectChallengeComment">
+		SELECT CHAL_NO
+		     , CHAL_TITLE
+		     , TO_CHAR(CHAL_START, 'YYYY-MM-DD') "CHAL_START"
+		     , CHAL_CONTS
+		     , CHAL_HIT
+		     , CHALLENGE_FILE_PATH || CHALLENGE_CHANGE_NAME "TITLEIMG"
+		     , CHAL_STATUS
+		FROM CHALLENGE
+		WHERE CHAL_NO = ?
+	</entry>
+	
+	<!-- 챌린지 게시글 조회 시 조회수 증가를 위한 쿼리문 -->
+	<entry key="countListChallenge">
+		UPDATE CHALLENGE
+		   SET CHAL_HIT = CHAL_HIT + 1
+		WHERE CHAL_NO = ?
+		  AND CHAL_STATUS = 'Y'
+	</entry>
+	
+	<!-- 페이징 처리 시 필요한 총 게시글 수를 구하는 쿼리문 -->
+	<entry key="selectListCount">
+		SELECT COUNT(*) "COUNT"
+		FROM CHALLENGE_COMMENT
+		WHERE CHAL_COM_STATUS = 'Y'
+		  AND CHAL_NO = ?
+	</entry>
+	
+	<!-- 챌린지 댓글 리스트 조회를 위한 쿼리문 -->
+	<entry key="selectChallengeCommentList">
+		SELECT *
+		FROM (SELECT ROWNUM RNUM, C.*
+		      FROM(SELECT CHAL_COM_NO
+		                , CHAL_COM_CONTS
+		                , TO_CHAR(CHAL_COM_DATE, 'YYYY-MM-DD') "CHAL_COM_DATE"
+		                , CHAL_FILE_PATH || CHAL_CHANGE_NAME "TITLEIMG"
+		                , MEM_NAME
+		           FROM CHALLENGE_COMMENT
+		           JOIN CHALLENGE_ATTACHMENT ON(CHAL_COM_NO = CHAL_REF_CNO)
+		           JOIN MEMBER USING(MEM_NO)
+		           WHERE CHAL_COM_STATUS = 'Y'
+		             AND CHAL_NO = ?
+		           ORDER BY CHAL_COM_NO DESC) C)
+		WHERE RNUM BETWEEN ? AND ?
+	</entry>
+	
+	<!-- 챌린지 게시글 내용, 첨부파일 삽입을 위한 쿼리문 -->
+	<entry key="insertChallenge">
+		INSERT INTO CHALLENGE(CHAL_NO
+			                , CHAL_TITLE
+			                , CHAL_START
+			                , CHAL_END
+			                , CHAL_CONTS
+			                , CHAL_HIT
+			                , CHAL_STATUS
+			                , CHALLENGE_ORIGIN_NAME
+			                , CHALLENGE_CHANGE_NAME
+			                , CHALLENGE_FILE_PATH)
+			           VALUES(SEQ_CNO.NEXTVAL
+			                , ?
+			                , SYSDATE
+			                , SYSDATE + 30
+			                , ?
+			                , DEFAULT
+			                , DEFAULT
+			                , ?
+			                , ?
+			                , ?)
+	</entry>
+	
+	<!-- 챌린지 게시글 수정 폼을 가져오기 위한 쿼리문 -->
+	<entry key="updateFormChallenge">
+		SELECT CHAL_NO
+		     , CHAL_TITLE
+		     , CHAL_CONTS
+		     , CHALLENGE_ORIGIN_NAME
+		FROM CHALLENGE
+		WHERE CHAL_NO = ?
+		  AND CHAL_STATUS = 'Y'
+	</entry>
+	
+	<!-- 챌린지 게시글 삭제를 위한 쿼리문 -->
+	<entry key="deleteChallenge">
+		UPDATE CHALLENGE
+		   SET CHAL_STATUS = 'N'
+		 WHERE CHAL_NO = ?
+	</entry>
+	
+	<!-- 챌린지 게시글 내용, 첨부파일 수정을 위한 쿼리문 -->
+	<entry key="updateChallenge">
+		UPDATE CHALLENGE
+		   SET CHAL_TITLE = ?
+		     , CHAL_CONTS = ?
+		     , CHALLENGE_ORIGIN_NAME = ?
+		     , CHALLENGE_CHANGE_NAME = ?
+		     , CHALLENGE_FILE_PATH = ?
+		WHERE CHAL_NO = ?
+		  AND CHAL_STATUS = 'Y'
+	</entry>
+	
+	<!-- 챌린지 댓글만 삽입하기 위한 쿼리문 -->
+	<entry key="insertChallengeComment">
+		INSERT INTO CHALLENGE_COMMENT(CHAL_COM_NO
+		                            , CHAL_COM_CONTS
+		                            , CHAL_COM_DATE
+		                            , CHAL_COM_STATUS
+		                            , CHAL_NO
+		                            , MEM_NO)
+		                       VALUES(SEQ_CCNO.NEXTVAL
+		                            , ?
+		                            , SYSDATE
+		                            , DEFAULT
+		                            , ?
+		                            , ?)
+	</entry>
+	
+	<!-- 챌린지 댓글의 첨부파일 삽입하기 위한 쿼리문 -->
+	<entry key="insertChallengeCommentAttachment">
+		INSERT INTO CHALLENGE_ATTACHMENT(CHAL_FILE_NO
+		                               , CHAL_REF_CNO
+		                               , CHAL_ORIGIN_NAME
+		                               , CHAL_CHANGE_NAME
+		                               , CHAL_FILE_PATH
+		                               , CHAL_UPLOAD_DATE
+		                               , CHAL_AT_STATUS)
+		                          VALUES(SEQ_CANO.NEXTVAL
+		                               , SEQ_CCNO.CURRVAL
+		                               , ?
+		                               , ?
+		                               , ?
+		                               , SYSDATE
+		                               , 'Y')
+	</entry>
+	
+	<!-- 챌린지 댓글 삭제를 위한 쿼리문 -->
+	<entry key="deleteChallengeComment">
+		UPDATE CHALLENGE_COMMENT
+		   SET CHAL_COM_STATUS = 'N'
+		 WHERE CHAL_COM_NO = ?
+	</entry>
+	
+	<!-- 챌린지 댓글의 첨부파일 삭제를 위한 쿼리문 -->
+	<entry key="deleteChallengeCommentAttachment">
+		UPDATE CHALLENGE_ATTACHMENT
+		   SET CHAL_AT_STATUS = 'N'
+		 WHERE CHAL_REF_CNO = ?
+	</entry>
+	
+	<entry key="ChallengeRewardCommentNo">
+		SELECT CHAL_NO, CHAL_TITLE, CHAL_COM_NO
+		FROM CHALLENGE
+		JOIN CHALLENGE_COMMENT USING(CHAL_NO)
+		JOIN MEMBER USING(MEM_NO)
+		WHERE CHAL_STATUS = 'Y'
+		ORDER BY CHAL_COM_NO ASC
+	</entry>
+	
+	<entry key="ChallengeRewardName">
+		SELECT MEM_NAME
+		FROM CHALLENGE_COMMENT
+		JOIN MEMBER USING(MEM_NO)
+		WHERE CHAL_COM_NO IN (?, ?, ?)
+	</entry>
+	
+	<!-- ***************************************************************** -->
+	<entry key="selectRewardList">
+		SELECT CHAL_REWARD_NO
+			 , CHAL_REWARD_TITLE
+		     , CHAL_REWARD_HIT
+		     , CHAL_REWARD_DATE
+		  FROM CHALLENGE_REWARD
+		 WHERE CHAL_REWARD_STATUS = 'Y'
+      ORDER BY CHAL_REWARD_NO DESC
+	</entry>
+	
+	<entry key="insertReward">
+		INSERT INTO CHALLENGE_REWARD (CHAL_REWARD_NO
+		                            , CHAL_REWARD_TITLE
+		                            , CHAL_REWARD_CONTS
+		                            , ADMIN_NO)
+		                      VALUES (SEQ_CRNO.NEXTVAL
+		                            , ?
+		                            , ?
+		                            , 1)
+	</entry>
+	
+	<entry key="insertRewardAttachment">
+		INSERT INTO REWARD_ATTACHMENT (RE_FILE_NO
+					                 , RE_REF_CNO
+					                 , RE_ORIGIN_NAME
+					                 , RE_CHANGE_NAME
+					                 , RE_FILE_PATH)
+					           VALUES (SEQ_RANO.NEXTVAL
+					              	 , SEQ_CRNO.CURRVAL
+					              	 , ?
+						             , ?
+						             , ?)
+
+	</entry>
+	
+	<entry key="increaseCount">
+		UPDATE CHALLENGE_REWARD
+		   SET CHAL_REWARD_HIT = CHAL_REWARD_HIT + 1 
+		 WHERE CHAL_REWARD_NO = ?
+		   AND CHAL_REWARD_STATUS = 'Y'
+	</entry>
+	
+	<entry key="selectReward">
+		SELECT CHAL_REWARD_NO 
+			 , CHAL_REWARD_TITLE
+		     , CHAL_REWARD_DATE
+		     , CHAL_REWARD_HIT
+		     , CHAL_REWARD_CONTS
+		     , RE_FILE_PATH || RE_CHANGE_NAME "TITLEIMG"
+         FROM CHALLENGE_REWARD
+         LEFT JOIN REWARD_ATTACHMENT ON (CHAL_REWARD_NO = RE_REF_CNO)
+		 WHERE CHAL_REWARD_NO = ?
+		   AND CHAL_REWARD_STATUS = 'Y'
+	</entry>
+	
+	<entry key="selectRewardAttachment">
+		SELECT RE_FILE_NO
+		     , RE_ORIGIN_NAME
+		     , RE_CHANGE_NAME
+		     , RE_FILE_PATH
+	 	  FROM REWARD_ATTACHMENT
+		 WHERE RE_REF_CNO = ?
+		   AND RE_AT_STATUS = 'Y'
+	</entry>
+	
+	<entry key="updateFormReward">
+		SELECT CHAL_REWARD_NO
+			 , CHAL_REWARD_TITLE
+			 , CHAL_REWARD_DATE
+		     , CHAL_REWARD_HIT
+		     , CHAL_REWARD_CONTS
+		  FROM CHALLENGE_REWARD
+		 WHERE CHAL_REWARD_NO = ?
+		   AND CHAL_REWARD_STATUS = 'Y'
+	</entry>
+	
+	<entry key="updateFormRewardAttachment">
+		SELECT RE_FILE_NO
+		     , RE_ORIGIN_NAME
+		     , RE_CHANGE_NAME
+		     , RE_FILE_PATH
+		  FROM REWARD_ATTACHMENT
+		 WHERE RE_REF_CNO = ?
+		   AND RE_AT_STATUS = 'Y'
+	</entry>
+	
+	<entry key="updateReward">
+		UPDATE CHALLENGE_REWARD
+		   SET CHAL_REWARD_TITLE = ?
+		     , CHAL_REWARD_CONTS = ?
+		 WHERE CHAL_REWARD_NO = ?
+		   AND CHAL_REWARD_STATUS = 'Y'
+	</entry>
+	
+	<entry key="updateRewardAttachment">
+		UPDATE REWARD_ATTACHMENT
+		   SET RE_ORIGIN_NAME = ?
+		     , RE_CHANGE_NAME = ?
+		     , RE_FILE_PATH = ?
+		     , RE_UPLOAD_DATE = SYSDATE
+		 WHERE RE_FILE_NO = ?
+		   AND RE_AT_STATUS = 'Y'
+	</entry>
+	
+	<entry key="insertNewRewardAttachment">
+		INSERT INTO REWARD_ATTACHMENT(RE_FILE_NO
+									, RE_REF_CNO
+									, RE_ORIGIN_NAME
+									, RE_CHANGE_NAME
+									, RE_FILE_PATH)
+							   VALUES(SEQ_RANO.NEXTVAL
+				              	    , ?
+				              	    , ?
+					                , ?
+					                , ?)
+	</entry>
+	
+	<entry key="deleteReward">
+		UPDATE CHALLENGE_REWARD
+		   SET CHAL_REWARD_STATUS = 'N'
+		 WHERE CHAL_REWARD_NO = ?
+	</entry>
+	
+	<entry key="deleteRewardAttachment">
+		UPDATE REWARD_ATTACHMENT
+		   SET RE_AT_STATUS = 'N'
+		 WHERE RE_FILE_NO = ?
+	</entry>
+
+</properties>
+
+
+
+
+
+
+
+

@@ -1,0 +1,465 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+
+	<comment>SQL</comment>
+	
+	<!-- 회원 로그인 -->
+	<entry key="loginMember">
+		SELECT *
+		FROM MEMBER
+		WHERE MEM_ID = ?
+		  AND MEM_PWD = ?
+	      AND MEM_STATUS = 'Y' 
+	</entry>
+	
+	<!-- 회원가입(개인) -->
+	<entry key="insertMember">
+   		INSERT INTO MEMBER (MEM_NO
+   						 , MEM_TYPE
+   						 , MEM_ID
+   						 , MEM_PWD
+   						 , MEM_NAME
+   						 , ADDRESS_1
+   						 , ADDRESS_2
+   						 , ZIP
+   						 , EMAIL
+   						 , PHONE
+   						 , ENROLL_DATE
+   						 , PERSONAL_NO
+   						 , MEM_STATUS)
+   				   VALUES (SEQ_MNO.NEXTVAL
+   				   		 , 1
+   				   		 , ?
+   				   		 , ?
+   				   		 , ?
+   				   		 , ?
+   				   		 , ?
+   				   		 , ?
+   				   		 , ?
+   				   		 , ?
+   				   		 , SYSDATE
+   				   		 , ?
+   				   		 , DEFAULT)
+  	</entry>
+  	
+  	<!-- 회원가입(기업) -->
+ 	<entry key="companyInsertMember">
+  		INSERT INTO MEMBER (MEM_NO
+  						 , MEM_TYPE
+  						 , MEM_ID
+  						 , MEM_PWD
+  						 , MEM_NAME
+  						 , ADDRESS_1
+  						 , ADDRESS_2
+  						 , ZIP
+  						 , EMAIL
+  						 , PHONE
+  						 , ENROLL_DATE
+  						 , COMPANY_NO
+  						 , COMPANY_NAME
+  						 , MEM_STATUS)
+  				   VALUES (SEQ_MNO.NEXTVAL
+  				   		 , 3
+  				   		 , ?
+  				   		 , ?
+  				   		 , ?
+  				   		 , ?
+  				   		 , ?
+  				   		 , ?
+  				   		 , ?
+  				   		 , ?
+  				   		 , SYSDATE
+  				   		 , ?
+  				   		 , ?
+  				   		 , DEFAULT)
+  	</entry>
+  	
+  	<!-- 회원가입(단체) -->
+  	<entry key="groupInsertMember">
+   		INSERT INTO MEMBER (MEM_NO
+   						 , MEM_TYPE
+   						 , MEM_ID
+   						 , MEM_PWD
+   						 , MEM_NAME
+   						 , ADDRESS_1
+   						 , ADDRESS_2
+   						 , ZIP
+   						 , EMAIL
+   						 , PHONE
+   						 , ENROLL_DATE
+   						 , GROUP_NAME
+   						 , MEM_STATUS)
+   				   VALUES (SEQ_MNO.NEXTVAL
+   				   		 , 2
+   				   		 , ?
+   				   		 , ?
+   				   		 , ?
+   				   		 , ?
+   				   		 , ?
+   				   		 , ?
+   				   		 , ?
+   				   		 , ?
+   				   		 , SYSDATE
+   				   		 , ?
+   				   		 , DEFAULT)
+  	</entry>
+  	
+  	<!-- 회원가입 아이디 중복 체크 -->
+	<entry key="idCheck">
+		SELECT COUNT(*)
+		FROM MEMBER
+		WHERE MEM_ID = ?
+	</entry>
+	
+  	<!-- 아이디찾기 -->	
+	<entry key="findIdMember">
+		SELECT MEM_NAME, MEM_ID
+		  FROM MEMBER
+		 WHERE MEM_NAME = ?
+		   AND EMAIL = ?
+	       AND MEM_STATUS = 'Y' 	
+	</entry>
+	
+	<!-- 비밀번호찾기 -->
+	<entry key="findPasswordMember">
+		SELECT MEM_NO, MEM_ID, MEM_PWD
+		  FROM MEMBER
+		 WHERE MEM_ID = ?
+		   AND MEM_NAME = ?
+		   AND EMAIL = ?
+	       AND MEM_STATUS = 'Y' 	
+	</entry>
+	
+	
+	<!-- 그룹회원 전체 페이징 위한 리스트카운트 -->
+	<entry key="selectListCountGroupAll">
+		SELECT COUNT(*) COUNT
+		FROM MEMBER
+		WHERE MEM_STATUS = 'Y'
+		  AND MEM_TYPE IN ('2', '3')
+	</entry>
+	
+	<!-- 그룹회원 번호조회 페이징 위한 리스트카운트 -->
+	<entry key="selectListCountGroupMemNo">
+		SELECT COUNT(*) COUNT
+		FROM MEMBER
+		WHERE MEM_STATUS = 'Y'
+		  AND MEM_TYPE IN ('2', '3')
+		  AND MEM_NO = ?
+	</entry>
+	
+	<!-- 그룹회원 이름조회 페이징 위한 리스트카운트 -->
+	<entry key="selectListCountGroupMemName">
+		SELECT COUNT(*) COUNT
+		FROM MEMBER
+		WHERE MEM_STATUS = 'Y'
+		  AND MEM_TYPE IN ('2', '3')
+		  AND MEM_NAME LIKE '%' || ? || '%'
+	</entry>
+	
+	<!-- 그룹회원 가입일조회 페이징 위한 리스트카운트 -->
+	<entry key="selectListCountGroupDate">
+		SELECT COUNT(*) COUNT
+		FROM MEMBER
+		WHERE MEM_STATUS = 'Y'
+		  AND MEM_TYPE IN ('2', '3')
+		  AND TO_CHAR(ENROLL_DATE, 'YYYY-MM-DD') = ?
+	</entry>
+	
+	<!-- 개인회원 전체 페이징 위한 리스트카운트 -->
+	<entry key="selectListCountAll">
+		SELECT COUNT(*) COUNT
+		FROM MEMBER
+		WHERE MEM_STATUS = 'Y'
+		  AND MEM_TYPE = '1'
+	</entry>
+	
+	<!-- 개인회원 번호조회 페이징 위한 리스트카운트 -->
+	<entry key="selectListCountMemNo">
+		SELECT COUNT(*) COUNT
+		FROM MEMBER
+		WHERE MEM_STATUS = 'Y'
+		  AND MEM_TYPE = '1'
+		  AND MEM_NO = ?
+	</entry>
+	
+	<!-- 개인회원 이름조회 페이징 위한 리스트카운트 -->
+	<entry key="selectListCountMemName">
+		SELECT COUNT(*) COUNT
+		FROM MEMBER
+		WHERE MEM_STATUS = 'Y'
+		  AND MEM_TYPE = '1'
+		  AND MEM_NAME LIKE '%' || ? || '%'
+	</entry>
+	
+	<!-- 개인회원 가입일조회 페이징 위한 리스트카운트 -->
+	<entry key="selectListCountDate">
+		SELECT COUNT(*) COUNT
+		FROM MEMBER
+		WHERE MEM_STATUS = 'Y'
+		  AND MEM_TYPE = '1'
+		  AND TO_CHAR(ENROLL_DATE, 'YYYY-MM-DD') = ?
+	</entry>
+	
+	
+	<!-- 그룹회원관리 전체조회 -->
+	<entry key="selectGroupMemberListAll">
+		SELECT *
+		FROM (SELECT ROWNUM RNUM, M.*
+		      FROM(SELECT MEM_NO
+		                , MEM_NAME
+		                , PHONE
+		                , MEM_ID
+		                , TO_CHAR(ENROLL_DATE, 'YYYY-MM-DD') ENROLL_DATE
+		           FROM MEMBER
+		           WHERE MEM_STATUS = 'Y'
+                     AND MEM_TYPE IN ('2', '3')
+		           ORDER BY MEM_NO ASC) M)
+		WHERE RNUM BETWEEN ? AND ?
+	</entry>			
+	
+	<!-- 그룹회원관리 회원번호별조회 -->
+	<entry key="selectGroupMemberListMemNo">
+		SELECT *
+		FROM (SELECT ROWNUM RNUM, M.*
+		      FROM(SELECT MEM_NO
+		                , MEM_NAME
+		                , PHONE
+		                , MEM_ID
+		                , TO_CHAR(ENROLL_DATE, 'YYYY-MM-DD') ENROLL_DATE
+		           FROM MEMBER
+		           WHERE MEM_STATUS = 'Y'
+                     AND MEM_TYPE IN ('2', '3')
+                     AND MEM_NO =?
+		           ORDER BY MEM_NO ASC) M)
+		WHERE RNUM BETWEEN ? AND ?
+	</entry>
+		
+	<!-- 그룹회원관리 회원이름별조회 -->
+	<entry key="selectGroupMemberListMemName">
+		SELECT *
+		FROM (SELECT ROWNUM RNUM, M.*
+		      FROM(SELECT MEM_NO
+		                   , MEM_NAME
+		                   , PHONE
+		                   , MEM_ID
+		                   , TO_CHAR(ENROLL_DATE, 'YYYY-MM-DD') ENROLL_DATE
+		           FROM MEMBER
+		           WHERE MEM_STATUS = 'Y'
+                     AND MEM_TYPE IN ('2', '3')
+                     AND MEM_NAME LIKE '%' || ? || '%'
+		           ORDER BY MEM_NO ASC) M)
+		WHERE RNUM BETWEEN ? AND ?
+	</entry>
+	
+	<!-- 그룹회원관리 가입일별조회 -->
+	<entry key="selectGroupMemberListDate">
+		SELECT *
+		FROM (SELECT ROWNUM RNUM, M.*
+		      FROM(SELECT MEM_NO
+		                   , MEM_NAME
+		                   , PHONE
+		                   , MEM_ID
+		                   , TO_CHAR(ENROLL_DATE, 'YYYY-MM-DD') ENROLL_DATE
+		           FROM MEMBER
+		           WHERE MEM_STATUS = 'Y'
+                     AND MEM_TYPE IN ('2', '3')
+                     AND TO_CHAR(ENROLL_DATE, 'YYYY-MM-DD') =?
+		           ORDER BY MEM_NO ASC) M)
+		WHERE RNUM BETWEEN ? AND ?
+	</entry>
+	
+	<!-- 개인회원관리 전체조회 -->
+	<entry key="selectMemberListAll">
+		SELECT *
+		FROM (SELECT ROWNUM RNUM, M.*
+		      FROM(SELECT MEM_NO
+		                   , MEM_NAME
+		                   , PHONE
+		                   , MEM_ID
+		                   , TO_CHAR(ENROLL_DATE, 'YYYY-MM-DD') ENROLL_DATE
+		           FROM MEMBER
+		           WHERE MEM_STATUS = 'Y'
+                     AND MEM_TYPE = '1'
+		           ORDER BY MEM_NO ASC) M)
+		WHERE RNUM BETWEEN ? AND ?
+	</entry>			
+	
+	<!-- 개인회원관리 회원번호별조회 -->
+	<entry key="selectMemberListMemNo">
+		SELECT *
+		FROM (SELECT ROWNUM RNUM, M.*
+		      FROM(SELECT MEM_NO
+		                   , MEM_NAME
+		                   , PHONE
+		                   , MEM_ID
+		                   , TO_CHAR(ENROLL_DATE, 'YYYY-MM-DD') ENROLL_DATE
+		           FROM MEMBER
+		           WHERE MEM_STATUS = 'Y'
+                     AND MEM_TYPE = '1'
+                     AND MEM_NO =?
+		           ORDER BY MEM_NO ASC) M)
+		WHERE RNUM BETWEEN ? AND ?
+	</entry>
+	
+	<!-- 개인회원관리 회원이름별조회 -->
+	<entry key="selectMemberListMemName">
+		SELECT *
+		FROM (SELECT ROWNUM RNUM, M.*
+		      FROM(SELECT MEM_NO
+		                   , MEM_NAME
+		                   , PHONE
+		                   , MEM_ID
+		                   , TO_CHAR(ENROLL_DATE, 'YYYY-MM-DD') ENROLL_DATE
+		           FROM MEMBER
+		           WHERE MEM_STATUS = 'Y'
+                     AND MEM_TYPE = '1'
+                     AND MEM_NAME LIKE '%' || ? || '%'
+		           ORDER BY MEM_NO ASC) M)
+		WHERE RNUM BETWEEN ? AND ?
+	</entry>
+	
+	<!-- 개인회원관리 가입일별조회 -->
+	<entry key="selectMemberListDate">
+		SELECT *
+		FROM (SELECT ROWNUM RNUM, M.*
+		      FROM(SELECT MEM_NO
+		                   , MEM_NAME
+		                   , PHONE
+		                   , MEM_ID
+		                   , TO_CHAR(ENROLL_DATE, 'YYYY-MM-DD') ENROLL_DATE
+		           FROM MEMBER
+		           WHERE MEM_STATUS = 'Y'
+                     AND MEM_TYPE = '1'
+                     AND TO_CHAR(ENROLL_DATE, 'YYYY-MM-DD') = ?
+		           ORDER BY MEM_NO ASC) M)
+		WHERE RNUM BETWEEN ? AND ?
+	</entry>
+	
+	<!-- 회원조회 -->
+	<entry key="selectMember">
+		SELECT *
+		  FROM MEMBER
+		 WHERE MEM_ID = ?
+		   AND MEM_STATUS = 'Y'
+	</entry>
+	
+	<!-- 회원번호로 회원조회 -->
+	<entry key="selectMemberNo">
+		SELECT *
+		  FROM MEMBER
+		 WHERE MEM_NO = ?
+		   AND MEM_STATUS = 'Y'
+	</entry>
+	
+	<!-- 회원관리 상세조회 -->
+	<entry key="detailMember">
+		SELECT MEM_NAME, MEM_ID, PHONE, EMAIL, ZIP, ADDRESS_1, ADDRESS_2
+		  FROM MEMBER
+		 WHERE MEM_NO = ?
+		   AND MEM_STATUS = 'Y'
+	</entry>
+	
+	<!-- 회원수정 -->
+	<entry key="updateMember">
+		UPDATE MEMBER
+		   SET MEM_NAME = ?
+		     , PHONE = ?
+		     , EMAIL = ?
+		     , ADDRESS_1 = ?
+		     , ADDRESS_2 = ?
+		     , ZIP = ?
+		 WHERE MEM_ID = ?
+	</entry>
+	
+	<!-- 회원비밀번호수정 -->
+	<entry key="updatePwdMember">
+		UPDATE MEMBER
+		   SET MEM_PWD = ?
+		 WHERE MEM_ID = ?
+		   AND MEM_PWD = ?
+	</entry>
+	
+	<!-- 회원탈퇴 -->
+	<entry key="deleteMember">
+		UPDATE MEMBER
+		   SET MEM_STATUS = 'N'
+		 WHERE MEM_ID = ?
+		   AND MEM_PWD = ?
+	</entry>
+
+	<!-- 관리자 회원탈퇴 -->
+	<entry key="deleteAdminMember">
+		UPDATE MEMBER
+		   SET MEM_STATUS = 'N'
+		 WHERE MEM_NO = ?
+	</entry>
+	
+	<entry key="countMemberList">
+		SELECT MEM_TYPE
+			 , COUNT(MEM_TYPE) MEMNUM
+		  FROM MEMBER
+		 WHERE MEM_TYPE IN (1, 2, 3)
+	  GROUP BY MEM_TYPE
+	  ORDER BY MEM_TYPE
+	</entry>
+	
+	<entry key="countDonationBill">
+		SELECT *
+		  FROM (SELECT MONTH, SUM(BILL)
+		         FROM (SELECT MONTH, BILL
+		                 FROM (SELECT TO_CHAR(DO_REG_DATE, 'MM') MONTH,
+		                              SUM(CASE WHEN DO_REG_DATE LIKE '22/%' THEN DO_REG_BILL END) BILL
+		                         FROM DONATION_REGULAR
+		                     GROUP BY TO_CHAR(DO_REG_DATE, 'MM')
+		             ORDER BY TO_CHAR(DO_REG_DATE, 'MM') ASC)
+		             UNION
+		             SELECT MONTH, BILL
+		               FROM (SELECT TO_CHAR(DO_DATE, 'MM') MONTH,
+		                            SUM(CASE WHEN DO_DATE LIKE '22/%' THEN DO_BILL END) BILL
+		                       FROM DONATION
+		                   GROUP BY TO_CHAR(DO_DATE, 'MM')
+		                   ORDER BY TO_CHAR(DO_DATE, 'MM') ASC))
+		           GROUP BY MONTH
+		           ORDER BY MONTH DESC)
+		        WHERE ROWNUM IN (1, 2, 3, 4, 5, 6)
+	 ORDER BY MONTH ASC
+	</entry>
+	
+	<entry key="countInquiry">	
+		SELECT 100 - (100 * ROW1/ROW2) COUNT
+		  FROM (SELECT SUM(CASE WHEN ANSWER_CONTS IS NULL THEN 1 ELSE 0 END) ROW1
+		             , SUM(CASE WHEN ANSWER_CONTS IS NOT NULL THEN 1 ELSE 0 END) ROW2
+		          FROM INQUIRY)
+	</entry>
+	
+	<entry key="totalDonation">
+		SELECT SUM(A)
+		  FROM (SELECT SUM(DO_BILL) A
+		          FROM DONATION
+		         WHERE DO_STATUS = 'Y'
+		         UNION
+		        SELECT SUM(DO_REG_BILL * DO_REG_COUNT)
+		          FROM DONATION_REGULAR
+		         WHERE DO_REG_STATUS = 'Y')
+	</entry>
+	
+	<entry key="totalChallengeCmt">
+		SELECT COUNT(CHAL_COM_CONTS) CMT
+		  FROM CHALLENGE_COMMENT C
+		  JOIN CHALLENGE USING (CHAL_NO)
+		 WHERE CHAL_COM_STATUS = 'Y'
+		   AND SYSDATE BETWEEN CHAL_START AND CHAL_END
+	</entry>
+	
+					
+</properties>
+
+
+
+
+
+
+
+

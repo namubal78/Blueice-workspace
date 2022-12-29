@@ -1,0 +1,435 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+
+	<comment>SQL</comment>
+	
+	<!-- 일시결제 가정보 INSERT -->
+	<entry key="insertDonation">
+		INSERT INTO DONATION (DO_ID, DO_BILL, DONATOR_NO)
+		VALUES ('blueice_donation_' || TO_CHAR(SEQ_DNO.NEXTVAL, 'FM00000000'), ?, ?)
+	</entry>
+	
+	<!-- 정기결제 가정보 INSERT -->
+	<entry key="insertRegular">
+		INSERT INTO DONATION_REGULAR (DO_REG_ID, DO_REG_BILL, REG_DONATOR_NO)
+		VALUES ('blueice_reg_donation_' || TO_CHAR(SEQ_DRNO.NEXTVAL, 'FM000000'), ?, ?)
+	</entry>
+	
+	<!-- *************************************************************** -->
+	
+	<!-- 실결제를 위한 PK와 금액 추출 -->
+	<entry key="SelectBeforeConfirm">
+		SELECT DO_ID, DO_BILL
+		FROM DONATION
+		WHERE DONATOR_NO = ?
+		  AND DO_BILL = ?
+		  AND DO_DATE = SYSDATE
+		  AND DO_STATUS = 'N'
+	</entry>
+	
+	<entry key="SelectRegBeforeConfirm">
+		SELECT DO_REG_ID, DO_REG_BILL
+		FROM DONATION_REGULAR
+		WHERE REG_DONATOR_NO = ?
+		  AND DO_REG_BILL = ?
+		  AND DO_REG_DATE = SYSDATE
+		  AND DO_REG_STATUS = 'N'
+	</entry>
+	
+	<!-- *************************************************************** -->
+	
+	<!-- 실결제 정보 UPDATE -->
+	<entry key="UpdateDonation">
+		UPDATE DONATION
+		SET RECEIPT_ID = ?, DO_STATUS = 'Y', RECEIPT_URL = ?
+		WHERE DO_ID = ?
+		  AND DO_STATUS = 'N'
+	</entry>
+	
+	<entry key="UpdateRegDonation">
+		UPDATE DONATION_REGULAR
+		SET RECEIPT_REG_ID = ?, DO_REG_STATUS = 'Y'
+		  , BILLINGKEY = ?, RESERVE_ID = ?
+		WHERE DO_REG_ID = ?
+		  AND DO_REG_STATUS = 'N'
+	</entry>
+	
+	<!-- *************************************************************** -->
+	
+	<!-- 정기 결제 예약 및 예약ID, COUNT 업데이트 -->
+	<entry key="UpdateSubscribe">
+		UPDATE DONATION_REGULAR
+		SET RESERVE_ID = ?, DO_REG_COUNT = DO_REG_COUNT+1, RECEIPT_REG_URL = ?
+		WHERE DO_REG_ID = ?
+		  AND DO_REG_STATUS = 'Y'
+	</entry>
+	
+	<!-- *************************************************************** -->
+	
+	<!-- 결제 정보 단건 조회 -->
+	<entry key="SelectDonation">
+		SELECT *
+		FROM DONATION
+		WHERE DO_STATUS = 'Y'
+		  AND DO_ID = ?
+	</entry>
+	
+	<entry key="SelectRegDonation">
+		SELECT *
+		FROM DONATION_REGULAR
+		WHERE DO_REG_STATUS = 'Y'
+		  AND DO_REG_ID = ?
+	</entry>
+	
+	<entry key="SelectRegDonationSumBill">
+		SELECT DO_REG_ID, RECEIPT_REG_ID, RECEIPT_REG_URL, DO_REG_DATE, DO_REG_COUNT, (DO_REG_COUNT * DO_REG_BILL) "SUMBILL"
+		     , REG_DONATOR_NO, RESERVE_ID, BILLINGKEY
+		FROM DONATION_REGULAR
+		WHERE DO_REG_STATUS IN ('Y', 'C', 'E')
+		  AND DO_REG_ID = ?
+	</entry>
+	
+	<!-- 빌링키를 이용한 정기결제 정보 단건 조회 -->
+	<entry key="SelectRegDonaWithBilling">
+		SELECT *
+		FROM DONATION_REGULAR
+		WHERE DO_REG_STATUS = 'Y'
+		  AND BILLINGKEY = ?
+	</entry>
+	
+	<!-- *************************************************************** -->
+	
+	<!-- 실결제 전 에러 발생 시 가정보 삭제 -->
+	<entry key="DeleteError">
+		DELETE FROM DONATION
+		WHERE DO_ID = ?
+	</entry>
+	
+	<entry key="DeleteErrorReg">
+		DELETE FROM DONATION_REGULAR
+		WHERE DO_REG_ID = ?
+	</entry>
+	
+	<!-- *************************************************************** -->
+	
+	<!-- 실결제 후 취소, 에러 발생 등에 따른 STATUS값 업데이트 -->
+	<entry key="CancelDonation">
+		UPDATE DONATION
+		SET DO_STATUS = 'C'
+		WHERE RECEIPT_ID = ?
+		  AND DO_STATUS = 'Y'
+	</entry>
+	
+	<entry key="CancelRegDonation">
+		UPDATE DONATION_REGULAR
+		SET DO_REG_STATUS = 'C'
+		WHERE RESERVE_ID = ?
+		  AND DO_REG_STATUS = 'Y'
+	</entry>
+	
+	<entry key="CancelRegDonationError">
+		UPDATE DONATION_REGULAR
+		SET DO_REG_STATUS = 'E'
+		WHERE RESERVE_ID = ?
+		  AND DO_REG_STATUS = 'Y'
+	</entry>
+	
+	<!-- *************************************************************** -->
+	<!-- 페이징 처리를 위한 상황에 따른 listCount 구하기 -->
+	<entry key="selectListCount">
+		SELECT COUNT(*) COUNT
+		FROM DONATION
+		WHERE DO_STATUS = 'Y'
+	</entry>
+	
+	<entry key="selectRegListCount">
+		SELECT COUNT(*) COUNT
+		FROM DONATION_REGULAR
+		WHERE DO_REG_STATUS IN ('Y', 'C', 'E')
+	</entry>
+	
+	<entry key="selectListSearchNameCount">
+		SELECT COUNT(*) COUNT
+		FROM DONATION
+		LEFT JOIN MEMBER ON (DONATOR_NO = MEM_NO)
+		WHERE DO_STATUS = 'Y'
+		  AND (MEM_NAME LIKE '%' || ? || '%' OR GROUP_NAME LIKE '%' || ? || '%' OR COMPANY_NAME LIKE '%' || ? || '%')
+	</entry>
+	
+	<entry key="selectRegListSearchNameCount">
+		SELECT COUNT(*) COUNT
+		FROM DONATION_REGULAR
+		LEFT JOIN MEMBER ON (REG_DONATOR_NO = MEM_NO)
+		WHERE DO_REG_STATUS IN ('Y', 'C', 'E')
+		  AND (MEM_NAME LIKE '%' || ? || '%' OR GROUP_NAME LIKE '%' || ? || '%' OR COMPANY_NAME LIKE '%' || ? || '%')
+	</entry>
+	
+	<entry key="selectListSearchIdCount">
+		SELECT COUNT(*) COUNT
+		FROM DONATION
+		LEFT JOIN MEMBER ON (DONATOR_NO = MEM_NO)
+		WHERE DO_STATUS = 'Y'
+		  AND MEM_ID LIKE '%' || ? || '%'
+	</entry>
+	
+	<entry key="selectRegListSearchIdCount">
+		SELECT COUNT(*) COUNT
+		FROM DONATION_REGULAR
+		LEFT JOIN MEMBER ON (REG_DONATOR_NO = MEM_NO)
+		WHERE DO_REG_STATUS IN ('Y', 'C', 'E')
+		  AND MEM_ID LIKE '%' || ? || '%'
+	</entry>
+	
+	<entry key="selectListSearchTypeCount">
+		SELECT COUNT(*) COUNT
+		FROM DONATION
+		LEFT JOIN MEMBER ON (DONATOR_NO = MEM_NO)
+		WHERE DO_STATUS = 'Y'
+		  AND MEM_TYPE = ?
+	</entry>
+	
+	<entry key="selectRegListSearchTypeCount">
+		SELECT COUNT(*) COUNT
+		FROM DONATION_REGULAR
+		LEFT JOIN MEMBER ON (REG_DONATOR_NO = MEM_NO)
+		WHERE DO_REG_STATUS IN ('Y', 'C', 'E')
+		  AND MEM_TYPE = ?
+	</entry>
+	
+	<!-- *************************************************************** -->
+	
+	<!-- 목록 조회 -->
+	
+	<entry key="selectDonaList">
+		SELECT *
+		FROM(SELECT ROWNUM RNUM, D.*
+		     FROM (SELECT DO_ID
+		                , DO_DATE
+		                , DO_BILL
+		                , DONATOR_NO
+		                , RECEIPT_ID
+		           FROM DONATION
+		           WHERE DO_STATUS = 'Y' 
+		           ORDER BY DO_ID DESC) D)
+		WHERE RNUM BETWEEN ? AND ?
+	</entry>
+	
+	<entry key="selectTemSearchNameList">
+		SELECT *
+		FROM(SELECT ROWNUM RNUM, D.*
+		     FROM (SELECT DO_ID
+		                , DO_DATE
+		                , DO_BILL
+		                , DONATOR_NO
+		                , RECEIPT_ID
+		           FROM DONATION
+				   LEFT JOIN MEMBER ON (DONATOR_NO = MEM_NO)
+		           WHERE DO_STATUS = 'Y'
+		           	 AND (MEM_NAME LIKE '%' || ? || '%' OR GROUP_NAME LIKE '%' || ? || '%' OR COMPANY_NAME LIKE '%' || ? || '%')
+		           ORDER BY DO_ID DESC) D)
+		WHERE RNUM BETWEEN ? AND ?
+	</entry>
+	
+	<entry key="selectTemSearchIdList">
+		SELECT *
+		FROM(SELECT ROWNUM RNUM, D.*
+		     FROM (SELECT DO_ID
+		                , DO_DATE
+		                , DO_BILL
+		                , DONATOR_NO
+		                , RECEIPT_ID
+		           FROM DONATION
+				   LEFT JOIN MEMBER ON (DONATOR_NO = MEM_NO)
+		           WHERE DO_STATUS = 'Y'
+		           	 AND MEM_ID LIKE '%' || ? || '%'
+		           ORDER BY DO_ID DESC) D)
+		WHERE RNUM BETWEEN ? AND ?
+	</entry>
+	
+	<entry key="selectTemSearchTypeList">
+		SELECT *
+		FROM(SELECT ROWNUM RNUM, D.*
+		     FROM (SELECT DO_ID
+		                , DO_DATE
+		                , DO_BILL
+		                , DONATOR_NO
+		                , RECEIPT_ID
+		           FROM DONATION
+				   LEFT JOIN MEMBER ON (DONATOR_NO = MEM_NO)
+		           WHERE DO_STATUS = 'Y'
+		           	 AND MEM_TYPE = ?
+		           ORDER BY DO_ID DESC) D)
+		WHERE RNUM BETWEEN ? AND ?
+	</entry>
+	
+	<entry key="selectRegDonaList">
+		SELECT *
+		FROM(SELECT ROWNUM RNUM, D.*
+		     FROM (SELECT DO_REG_ID
+		                , DO_REG_DATE
+		                , DO_REG_COUNT
+		                , (DO_REG_COUNT * DO_REG_BILL) "SUMBILL"
+		                , REG_DONATOR_NO
+		                , RESERVE_ID
+		                , BILLINGKEY
+		           FROM DONATION_REGULAR
+		           WHERE DO_REG_STATUS IN ('Y', 'C', 'E')
+		           ORDER BY DO_REG_ID DESC) D)
+		WHERE RNUM BETWEEN ? AND ?
+	</entry>
+	
+	<entry key="selectRegSearchNameList">
+		SELECT *
+		FROM(SELECT ROWNUM RNUM, D.*
+		     FROM (SELECT DO_REG_ID
+		                , DO_REG_DATE
+		                , DO_REG_COUNT
+		                , (DO_REG_COUNT * DO_REG_BILL) "SUMBILL"
+		                , REG_DONATOR_NO
+		                , RESERVE_ID
+		                , BILLINGKEY
+		           FROM DONATION_REGULAR
+				   LEFT JOIN MEMBER ON (REG_DONATOR_NO = MEM_NO)
+		           WHERE DO_REG_STATUS IN ('Y', 'C', 'E')
+		           	 AND (MEM_NAME LIKE '%' || ? || '%' OR GROUP_NAME LIKE '%' || ? || '%' OR COMPANY_NAME LIKE '%' || ? || '%')
+		           ORDER BY DO_REG_ID DESC) D)
+		WHERE RNUM BETWEEN ? AND ?
+	</entry>
+	
+	<entry key="selectRegSearchIdList">
+		SELECT *
+		FROM(SELECT ROWNUM RNUM, D.*
+		     FROM (SELECT DO_REG_ID
+		                , DO_REG_DATE
+		                , DO_REG_COUNT
+		                , (DO_REG_COUNT * DO_REG_BILL) "SUMBILL"
+		                , REG_DONATOR_NO
+		                , RESERVE_ID
+		                , BILLINGKEY
+		           FROM DONATION_REGULAR
+				   LEFT JOIN MEMBER ON (REG_DONATOR_NO = MEM_NO)
+		           WHERE DO_REG_STATUS IN ('Y', 'C', 'E')
+		           	 AND MEM_ID LIKE '%' || ? || '%'
+		           ORDER BY DO_REG_ID DESC) D)
+		WHERE RNUM BETWEEN ? AND ?
+	</entry>
+	
+	<entry key="selectRegSearchTypeList">
+		SELECT *
+		FROM(SELECT ROWNUM RNUM, D.*
+		     FROM (SELECT DO_REG_ID
+		                , DO_REG_DATE
+		                , DO_REG_COUNT
+		                , (DO_REG_COUNT * DO_REG_BILL) "SUMBILL"
+		                , REG_DONATOR_NO
+		                , RESERVE_ID
+		                , BILLINGKEY
+		           FROM DONATION_REGULAR
+				   LEFT JOIN MEMBER ON (REG_DONATOR_NO = MEM_NO)
+		           WHERE DO_REG_STATUS IN ('Y', 'C', 'E')
+		           	 AND MEM_TYPE = ?
+		           ORDER BY DO_REG_ID DESC) D)
+		WHERE RNUM BETWEEN ? AND ?
+	</entry>
+	
+	<!-- *************************************************************** -->
+	<!-- 페이징 처리를 위한 상황에 따른 listCount 구하기 -->
+	<entry key="selectMyListCount">
+		SELECT COUNT(*) COUNT
+		FROM DONATION
+		LEFT JOIN MEMBER ON (DONATOR_NO = MEM_NO)
+		WHERE DO_STATUS = 'Y'
+		  AND MEM_NO = ?
+	</entry>
+	
+	<entry key="selectMyRegListCount">
+		SELECT COUNT(*) COUNT
+		FROM DONATION_REGULAR
+		LEFT JOIN MEMBER ON (REG_DONATOR_NO = MEM_NO)
+		WHERE DO_REG_STATUS IN ('Y', 'C', 'E')
+		  AND MEM_NO = ?
+	</entry>
+	
+	<entry key="selectMyDonaList">
+		SELECT *
+		FROM(SELECT ROWNUM RNUM, D.*
+		     FROM (SELECT DO_ID
+		                , DO_DATE
+		                , DO_BILL
+		                , DONATOR_NO
+		                , RECEIPT_URL
+		                , RECEIPT_ID
+		           FROM DONATION
+		           LEFT JOIN MEMBER ON (DONATOR_NO = MEM_NO)
+		           WHERE DO_STATUS = 'Y'
+		             AND DONATOR_NO = ?
+		           ORDER BY DO_ID DESC) D)
+		WHERE RNUM BETWEEN ? AND ?
+	</entry>
+	
+	<entry key="selectMyRegDonaList">
+		SELECT *
+		FROM(SELECT ROWNUM RNUM, D.*
+		     FROM (SELECT DO_REG_ID
+		                , DO_REG_DATE
+		                , DO_REG_COUNT
+		                , (DO_REG_COUNT * DO_REG_BILL) "SUMBILL"
+		                , REG_DONATOR_NO
+		                , RECEIPT_REG_URL
+		                , RESERVE_ID
+		           FROM DONATION_REGULAR
+				   LEFT JOIN MEMBER ON (REG_DONATOR_NO = MEM_NO)
+		           WHERE DO_REG_STATUS IN ('Y', 'C', 'E')
+		           	 AND REG_DONATOR_NO = ?
+		           ORDER BY DO_REG_ID DESC) D)
+		WHERE RNUM BETWEEN ? AND ?
+	</entry>
+	
+	<!-- ********************** 기부금 영수증 조회를 위한 쿼리문 ************************ -->
+	<!-- 금년 내역(정기) 후원 금액 -->
+	<entry key="selectRegDonationYear">
+		SELECT DO_REG_BILL*DO_REG_COUNT YEARTOTAL_REG 
+	      FROM DONATION_REGULAR
+	     WHERE REG_DONATOR_NO = ?
+	       AND DO_REG_STATUS IN ('Y', 'C', 'E')
+	       AND EXTRACT(YEAR FROM SYSDATE) = EXTRACT(YEAR FROM DO_REG_DATE)
+	</entry>
+	
+	<!-- 금년 내역(일시) -->
+	<entry key="selectDonationYear">
+		SELECT SUM(DO_BILL) YEARTOTAL
+	      FROM DONATION
+	     WHERE DONATOR_NO = ?
+	       AND DO_STATUS = 'Y'
+	       AND EXTRACT(YEAR FROM SYSDATE) = EXTRACT(YEAR FROM DO_DATE)
+	</entry>
+	
+	<!-- 모든 내역(정기) -->
+	<entry key="selectRegDonationFull">
+		SELECT TO_CHAR (DO_REG_DATE, 'YYYY-MM-DD') || '~' || TO_CHAR (SYSDATE, 'YYYY-MM-DD') "DO_REG_DATE"
+			 , DO_REG_BILL*DO_REG_COUNT TOTAL_REG
+	      FROM DONATION_REGULAR
+	     WHERE REG_DONATOR_NO = ?
+    	   AND DO_REG_STATUS IN ('Y', 'C', 'E')
+	</entry>
+	
+	<!-- 모든 내역(일시) -->
+	<entry key="selectDonationFull">
+		SELECT TO_CHAR (MIN(DO_DATE), 'YYYY-MM-DD') || '~' || TO_CHAR (SYSDATE, 'YYYY-MM-DD') "MIN(DO_DATE)"
+			 , SUM(DO_BILL) TOTAL
+	      FROM DONATION
+	     WHERE DONATOR_NO = ?
+           AND DO_STATUS = 'Y'
+	</entry>
+	
+	
+</properties>
+
+
+
+
+
+
+
+

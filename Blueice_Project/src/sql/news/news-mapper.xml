@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+
+	<comment>SQL</comment>
+	
+	<!-- 페이징 바에 들어갈 게시판 개수를 구하는 쿼리문 -->
+	<entry key="selectListCount">
+		SELECT COUNT(*) COUNT
+		FROM NEWS
+		WHERE NEWS_STATUS = 'Y'
+	</entry>
+	
+	<!-- 각 페이지마다 들어갈 게시글 조회를 위한 쿼리문 -->
+	<entry key="selectPaging">
+		SELECT *
+		FROM (SELECT ROWNUM RNUM, N.*
+		      FROM(SELECT NEWS_NO
+		                , NEWS_TITLE
+		                , NEWS_HIT
+		                , TO_CHAR(NEWS_DATE, 'YYYY-MM-DD') NEWS_DATE
+		                , FILE_PATH || CHANGE_NAME "TITLEIMG"
+		                , ADMIN_NO
+		           FROM NEWS
+		           JOIN ATTACHMENT ON(NEWS_NO = REF_BNO)
+		           WHERE NEWS_STATUS = 'Y'
+		           ORDER BY NEWS_NO DESC) N)
+		WHERE RNUM BETWEEN ? AND ?
+	</entry>
+	
+	<!-- 조회수 증가를 위한 쿼리문 -->
+	<entry key="countNewsPage">
+		UPDATE NEWS
+		   SET NEWS_HIT = NEWS_HIT + 1
+		WHERE NEWS_NO = ?
+		  AND NEWS_STATUS = 'Y'
+	</entry>
+	
+	<!-- 뉴스 상세조회 페이지를 위한 쿼리문 -->
+	<entry key="selectNewsPage">
+		SELECT NEWS_NO
+		     , NEWS_TITLE
+		     , NEWS_CONTS
+		     , TO_CHAR(NEWS_DATE, 'YYYY"년" MM"월" DD"일"') NEWS_DATE
+		     , NEWS_HIT
+		     , FILE_PATH || CHANGE_NAME "TITLEIMG"
+		     , ADMIN_NO
+		FROM NEWS
+		JOIN ATTACHMENT ON(NEWS_NO = REF_BNO)
+		WHERE REF_BNO = ?
+		  AND NEWS_STATUS = 'Y'
+	</entry>
+	
+	<!-- 뉴스 게시글 삽입을 위한 쿼리문 -->
+	<entry key="insertNews">
+		INSERT INTO NEWS(NEWS_NO
+               , NEWS_TITLE
+               , NEWS_CONTS
+               , ADMIN_NO)
+         VALUES(SEQ_NEWS_NO.NEXTVAL
+              , ?
+              , ?
+              , 1)
+	</entry>
+	
+	<!-- 뉴스 게시글의 첨부파일 삽입을 위한 쿼리문 -->
+	<entry key="insertNewsAttachment">
+		INSERT INTO ATTACHMENT(FILE_NO
+                     , REF_BNO
+                     , ORIGIN_NAME
+                     , CHANGE_NAME
+                     , FILE_PATH)
+                VALUES(SEQ_ANO.NEXTVAL
+                     , SEQ_NEWS_NO.CURRVAL
+                     , ?
+                     , ?
+                     , ?)
+	</entry>
+	
+	<!-- 뉴스 수정 페이지폼 가져오기 (내용) -->
+	<entry key="updateFormNews">
+		SELECT NEWS_NO 
+			 , NEWS_TITLE
+		     , NEWS_CONTS
+		     , TO_CHAR(NEWS_DATE, 'YYYY"년" MM"월" DD"일"') NEWS_DATE
+		FROM NEWS
+		WHERE NEWS_NO = ?
+		  AND NEWS_STATUS = 'Y'
+	</entry>
+	
+	<!-- 뉴스 수정 페이지폼 가져오기 (첨부파일) -->
+	<entry key="updateFormAttachment">
+		SELECT FILE_NO
+		     , ORIGIN_NAME
+		     , CHANGE_NAME
+		     , FILE_PATH
+		FROM ATTACHMENT
+		WHERE REF_BNO = ?
+		  AND STATUS = 'Y'
+	</entry>
+	
+	<!-- 뉴스 게시판 내용 수정을 위한 쿼리문 -->
+	<entry key="updateNews">
+		UPDATE NEWS
+		   SET NEWS_TITLE = ?
+		     , NEWS_CONTS = ?
+		WHERE NEWS_NO = ?
+		  AND NEWS_STATUS = 'Y'
+	</entry>
+	
+	<!-- 뉴스 게시판 첨부파일 수정을 위한 쿼리문 -->
+	<entry key="updateAttachment">
+		UPDATE ATTACHMENT
+		   SET ORIGIN_NAME = ?
+		     , CHANGE_NAME = ?
+		     , FILE_PATH = ?
+		     , UPLOAD_DATE = SYSDATE
+		WHERE FILE_NO = ?
+		  AND STATUS = 'Y'
+	</entry>
+	
+	<!-- 뉴스 게시글 삭제를 위한 쿼리문(내용) -->
+	<entry key="deleteNews">
+		UPDATE NEWS
+		   SET NEWS_STATUS = 'N'
+		WHERE NEWS_NO = ?
+	</entry>
+	
+	<!-- 뉴스 게시글 삭제를 위한 쿼리문(첨부파일) -->
+	<entry key="deleteAttachment">
+		UPDATE ATTACHMENT
+		   SET STATUS = 'N'
+		WHERE REF_BNO = ?
+	</entry>
+	
+	<!-- 검색할 키워드로 페이징 바에 들어갈 게시판 개수 구하는 쿼리문 -->
+	<entry key="selectSearchCount">
+		SELECT COUNT(*) COUNT
+		FROM NEWS
+		WHERE NEWS_STATUS = 'Y'
+		  AND NEWS_TITLE LIKE '%'||?||'%'
+	</entry>
+	
+	<!-- 키워드 검색으로 게시글 조회를 위한 쿼리문 -->	
+	<entry key="searchNews">
+		SELECT *
+		FROM (SELECT ROWNUM RNUM, N.*
+		      FROM(SELECT NEWS_NO
+		                , NEWS_TITLE
+		                , NEWS_HIT
+		                , TO_CHAR(NEWS_DATE, 'YYYY-MM-DD') NEWS_DATE
+		                , FILE_PATH || CHANGE_NAME "TITLEIMG"
+		                , ADMIN_NO
+		           FROM NEWS
+		           JOIN ATTACHMENT ON(NEWS_NO = REF_BNO)
+		           WHERE NEWS_STATUS = 'Y'
+		             AND NEWS_TITLE LIKE '%'||?||'%'
+		           ORDER BY NEWS_NO DESC) N)
+		WHERE RNUM BETWEEN ? AND ?
+
+	</entry>
+	
+</properties>
+
+
+
+
+
+
+
+

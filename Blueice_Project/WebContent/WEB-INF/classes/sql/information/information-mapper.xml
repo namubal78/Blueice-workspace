@@ -1,0 +1,257 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+
+	<comment>SQL</comment>
+	
+	<!-- 공지사항 게시글 총 "개수" 조회 -->
+	<entry key="selectListCount">
+		SELECT COUNT(*) COUNT
+		  FROM NOTICE
+		 WHERE N_STATUS = 'Y'
+	</entry>
+	
+	<!-- 공지사항 게시글 리스트 전체 조회 -->
+	<entry key="selectList">
+		SELECT * 
+		FROM (SELECT ROWNUM RNUM, A.*
+		        FROM (SELECT N_NO
+						   , N_TITLE
+						   , N_HIT
+						   , N_DATE
+						FROM NOTICE N
+						WHERE N.N_STATUS = 'Y'
+						ORDER BY N_NO DESC) A)
+		WHERE RNUM BETWEEN ? AND ?
+	</entry>
+	
+	<!-- 공지사항 검색시: 게시글 총 "개수" 조회 -->
+	<entry key="selectListSearchCount"> <!-- 검색 시 매퍼 -->
+		SELECT COUNT(*) COUNT
+		  FROM NOTICE
+		 WHERE N_STATUS = 'Y'
+		   AND N_TITLE LIKE '%' || ? || '%'
+	</entry>
+	
+	<!-- 공지사항 검색시: "게시글" 리스트 전체 조회 -->
+	<entry key="selectSearchList">
+		SELECT * 
+		FROM (SELECT ROWNUM RNUM, A.*
+		        FROM (SELECT N_NO
+						   , N_TITLE
+						   , N_HIT
+						   , N_DATE
+						FROM NOTICE N
+						WHERE N.N_STATUS = 'Y'
+						  AND N_TITLE LIKE '%' || ? || '%'
+						ORDER BY N_NO DESC) A)
+		WHERE RNUM BETWEEN ? AND ?
+	</entry>
+	
+	<!-- 공지사항 게시글 등록 -->
+	<entry key="insertNotice">
+		INSERT INTO NOTICE (N_NO
+                  , N_TITLE
+                  , N_CONTS
+                  , ADMIN_NO) 
+            VALUES (SEQ_NNO.NEXTVAL
+                  , ?
+                  , ?
+                  , 1)
+	</entry>
+	
+	<!-- 공지사항 게시글 클릭시 조회수 증가  -->
+	<entry key="increaseCount">
+		UPDATE NOTICE
+		   SET N_HIT = N_HIT + 1 
+		 WHERE N_NO = ? 
+		   AND N_STATUS = 'Y'
+	</entry>
+	
+	<!-- 공지사항 게시글 상세 조회 -->
+	<entry key="selectNotice">
+		SELECT N_NO
+		     , N_TITLE
+		     , N_DATE
+		     , N_HIT
+		     , N_CONTS
+		FROM NOTICE 
+		WHERE N_NO = ?
+		  AND N_STATUS = 'Y'
+	</entry>
+	
+	<!-- 공지사항 게시글 수정 -->
+	<entry key="updateNotice">
+		UPDATE NOTICE
+		   SET N_TITLE = ?
+		     , N_CONTS = ?
+		 WHERE N_NO = ?
+		   AND N_STATUS = 'Y'
+	</entry>
+	
+	<!-- 공지사항 게시글 삭제 -->
+	<entry key="deleteNotice">
+		UPDATE NOTICE
+		   SET N_STATUS = 'N' 
+		 WHERE N_NO = ?
+	</entry>
+	
+	<!-- 1:1 문의글 등록 -->
+	<entry key="insertInquiry">
+		INSERT INTO INQUIRY (INQUIRY_NO
+		      	           , INQUIRY_TITLE
+		     	           , INQUIRY_CONTS
+		     	           , INQUIRY_DATE
+		      	           , INQUIRY_STATUS
+		     	           , MEM_NO)
+		             VALUES (SEQ_INO.NEXTVAL
+		                  , ?
+		                  , ?
+		                  , SYSDATE
+		                  , DEFAULT
+		                  , ?)
+	</entry>
+	
+	<!-- faq 전체조회 -->
+	<entry key="selectFaq">
+		SELECT *
+		FROM FAQ
+	</entry>
+	
+	<!-- faq 관리자삭제 -->
+	<entry key="deleteFaq">
+		DELETE
+		FROM FAQ
+		WHERE FAQ_NO = ?
+	</entry>
+	
+	<entry key="insertInquiry">
+	INSERT INTO INQUIRY (INQUIRY_NO
+		      	           , INQUIRY_TITLE
+		     	           , INQUIRY_CONTS
+		     	           , INQUIRY_DATE
+		      	           , INQUIRY_STATUS
+		     	           , MEM_NO)
+		             VALUES (SEQ_INO.NEXTVAL
+		                  , ?
+		                  , ?
+		                  , SYSDATE
+		                  , DEFAULT
+		                  , ?)
+	</entry>
+	
+	<entry key="selectListCount">
+	SELECT COUNT(*) COUNT
+	FROM INQUIRY
+	WHERE INQUIRY_STATUS = 'Y'
+	</entry>
+	
+	<entry key="selectListInquiry">
+	SELECT *
+	FROM (SELECT ROWNUM RNUM, A.*
+	FROM (SELECT INQUIRY_NO
+	                   , INQUIRY_TITLE
+	                   , ANSWER_CONTS
+	                   , INQUIRY_DATE
+	                   , MEM_NO
+	            FROM INQUIRY I  
+	            JOIN MEMBER M USING (MEM_NO)
+	            WHERE INQUIRY_STATUS = 'Y'
+	            ORDER BY INQUIRY_NO DESC) A)
+	WHERE RNUM BETWEEN ? AND ?
+	</entry>
+	
+	<entry key="selectInquiry">
+	SELECT INQUIRY_NO, INQUIRY_TITLE, INQUIRY_CONTS, INQUIRY_DATE, ANSWER_CONTS, ANSWER_DATE, INQUIRY_STATUS, M.MEM_ID
+	FROM INQUIRY I
+	JOIN MEMBER M ON (I.MEM_NO = M.MEM_NO)
+	WHERE INQUIRY_NO = ?
+	AND INQUIRY_STATUS = 'Y'
+	</entry>
+	
+	<entry key="deleteInquiry">
+	UPDATE INQUIRY
+    SET INQUIRY_STATUS = 'N'
+    WHERE INQUIRY_NO = ?
+	</entry>
+	
+	<entry key="adminSelectList">
+	SELECT *
+	FROM (SELECT ROWNUM RNUM, A.*
+	FROM (SELECT INQUIRY_NO
+	                   , INQUIRY_TITLE
+	                   , INQUIRY_DATE
+	                   , ANSWER_CONTS
+	                   , MEM_ID
+	            FROM INQUIRY I  
+	            JOIN MEMBER M USING (MEM_NO)
+	            WHERE INQUIRY_STATUS = 'Y'
+	            ORDER BY INQUIRY_NO DESC) A)
+	WHERE RNUM BETWEEN ? AND ?
+	</entry>
+	
+	<entry key="adminInsertInquiry">
+    UPDATE INQUIRY
+    SET ANSWER_CONTS = ?
+        , ANSWER_DATE = SYSDATE
+    WHERE INQUIRY_NO = ?
+    AND INQUIRY_STATUS = 'Y'
+	</entry>
+	
+	<entry key="adminIdSearchList">
+	SELECT *
+	FROM (SELECT ROWNUM RNUM, A.*
+	FROM (SELECT INQUIRY_NO
+	                   , INQUIRY_TITLE
+	                   , INQUIRY_DATE
+	                   , ANSWER_CONTS
+	                   , MEM_ID
+	            FROM INQUIRY I  
+	            JOIN MEMBER M USING (MEM_NO)
+	            WHERE INQUIRY_STATUS = 'Y'
+	            AND MEM_ID LIKE ? 
+	            ORDER BY INQUIRY_NO DESC) A)
+	WHERE RNUM BETWEEN ? AND ?
+	</entry>
+	
+	<entry key="adminInquirySearChAnswerOList">
+	SELECT *
+	FROM (SELECT ROWNUM RNUM, A.*
+	FROM (SELECT INQUIRY_NO
+	                   , INQUIRY_TITLE
+	                   , INQUIRY_DATE
+	                   , ANSWER_CONTS
+	                   , MEM_ID
+	            FROM INQUIRY I  
+	            JOIN MEMBER M USING (MEM_NO)
+	            WHERE INQUIRY_STATUS = 'Y'
+	            AND ANSWER_CONTS IS NOT NULL
+	            ORDER BY INQUIRY_NO DESC) A)
+	WHERE RNUM BETWEEN ? AND ?
+	</entry>
+		
+	<entry key="adminInquirySearChAnswerXList">
+	SELECT *
+	FROM (SELECT ROWNUM RNUM, A.*
+	FROM (SELECT INQUIRY_NO
+	                   , INQUIRY_TITLE
+	                   , INQUIRY_DATE
+	                   , ANSWER_CONTS
+	                   , MEM_ID
+	            FROM INQUIRY I  
+	            JOIN MEMBER M USING (MEM_NO)
+	            WHERE INQUIRY_STATUS = 'Y'
+	            AND ANSWER_CONTS IS NULL
+	            ORDER BY INQUIRY_NO DESC) A)
+	WHERE RNUM BETWEEN ? AND ?
+	</entry>
+	
+</properties>
+
+
+
+
+
+
+
+
