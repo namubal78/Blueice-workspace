@@ -33,7 +33,7 @@ Development Framework :  jQuery 3.6.1
 
 라이센스를 준수하며 ``LICENSE``에서 자세한 정보를 확인할 수 있습니다.
 
-[https://github.com/namubal78/Blueice-workspace](https://github.com/dbader/)
+[https://github.com/namubal78/Blueice-workspace](https://github.com/namubal78/Blueice-workspace)
 
 <!-- Markdown link & img dfn's -->
 [npm-image]: https://img.shields.io/npm/v/datadog-metrics.svg?style=flat-square
