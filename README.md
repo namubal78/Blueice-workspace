@@ -1,6 +1,6 @@
 # Blueice-workspace
-
 > 북극 기후 위기 관련 후원 웹페이지 개발 프로젝트
+> (이 프로젝트는 KH정보교육원 당산 D Class '북극곰구해조'의 세미 프로젝트입니다)
 
 [![NPM Version][npm-image]][npm-url]
 [![Build Status][travis-image]][travis-url]
@@ -25,7 +25,7 @@ Development Framework :  jQuery 3.6.1
 ## 업데이트 내역
 
 * 1.0.0
-    * 첫 출시
+    * github upload
 
 ## 정보
 
@@ -33,7 +33,7 @@ Development Framework :  jQuery 3.6.1
 
 라이센스를 준수하며 ``LICENSE``에서 자세한 정보를 확인할 수 있습니다.
 
-[https://github.com/namubal78/Blueice-workspace](https://github.com/namubal78/Blueice-workspace)
+[LICENSE](https://github.com/namubal78/Blueice-workspace/blob/main/LICENSE)
 
 <!-- Markdown link & img dfn's -->
 [npm-image]: https://img.shields.io/npm/v/datadog-metrics.svg?style=flat-square
